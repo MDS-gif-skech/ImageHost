@@ -18,7 +18,7 @@ https://github.com/settings/personal-access-tokens/new
 Token name: ImageHost Worker
 Expiration: 建议 90 天、180 天，或按你的习惯设置
 Repository access: Only select repositories
-Selected repository: Ayayadaze/ImageHost
+Selected repository: MDS-gif-skech/ImageHost
 ```
 
 Repository permissions：
@@ -63,10 +63,10 @@ Settings -> Variables
 添加普通变量：
 
 ```text
-GITHUB_OWNER=Ayayadaze
+GITHUB_OWNER=MDS-gif-skech
 GITHUB_REPO=ImageHost
 GITHUB_BRANCH=main
-PUBLIC_BASE_URL=https://ayayadaze.github.io/ImageHost
+PUBLIC_BASE_URL=https://mds-gif-skech.github.io/ImageHost
 MAX_IMAGE_BYTES=10485760
 ALLOW_ORIGIN=*
 ```
@@ -104,7 +104,7 @@ https://imagehost-uploader.xxx.workers.dev/upload
 打开：
 
 ```text
-https://ayayadaze.github.io/ImageHost/upload.html
+https://mds-gif-skech.github.io/ImageHost/upload.html
 ```
 
 填写 Worker 上传接口。
