@@ -262,8 +262,9 @@ def main() -> int:
         lines.append("")
         for item in results:
             lines.append(f"- `{item.original_name}`")
-            lines.append(f"  - URL: {item.url}")
-            lines.append(f"  - Path: `{item.stored_path}`")
+            lines.append(f"  URL: {item.url}")
+            lines.append(f"  Markdown: `![image]({item.url})`")
+            lines.append(f"  Path: `{item.stored_path}`")
         lines.append("")
     if skipped:
         lines.append("Skipped duplicate images:")
