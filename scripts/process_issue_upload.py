@@ -108,7 +108,9 @@ def request_with_retry(url: str, token: str | None = None, retries: int = 3) -> 
         "User-Agent": "github-image-host-action",
         "Accept": "image/png,image/jpeg,image/webp,image/gif,*/*;q=0.8",
     }
-    if token:
+    # GitHub attachment URLs redirect to signed object-storage URLs. Forwarding
+    # Authorization to that redirected host can make the signed URL invalid.
+    if token and not is_supported_attachment_url(url):
         headers["Authorization"] = f"Bearer {token}"
 
     last_error: Exception | None = None
