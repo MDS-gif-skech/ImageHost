@@ -242,8 +242,13 @@ def main() -> int:
 
     results: list[UploadResult] = []
     skipped: list[str] = []
+    failed: list[tuple[str, str]] = []
     for url in urls:
-        result = save_upload(url, token=token)
+        try:
+            result = save_upload(url, token=token)
+        except Exception as exc:
+            failed.append((url, str(exc)))
+            continue
         if result.sha256 in known_sha:
             image_path = Path(result.stored_path)
             if image_path.exists():
@@ -273,6 +278,13 @@ def main() -> int:
         lines.append("")
         for digest in skipped:
             lines.append(f"- `{digest}`")
+        lines.append("")
+    if failed:
+        lines.append("Failed images:")
+        lines.append("")
+        for url, error in failed:
+            lines.append(f"- {url}")
+            lines.append(f"  Error: `{error}`")
         lines.append("")
     if not results and not skipped:
         lines.append("No image was saved.")
