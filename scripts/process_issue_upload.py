@@ -36,6 +36,7 @@ SOURCE_URL = os.getenv("SOURCE_URL", "")
 
 
 IMAGE_MARKDOWN_RE = re.compile(r"!\[[^\]]*\]\((https://[^)\s]+)\)")
+IMAGE_HTML_SRC_RE = re.compile(r"<img\b[^>]*\bsrc=[\"'](https://[^\"']+)[\"']", re.IGNORECASE)
 IMAGE_URL_RE = re.compile(r"https://[^\s)]+")
 
 
@@ -75,13 +76,14 @@ def read_event_body() -> str:
 def extract_candidate_urls(text: str) -> list[str]:
     urls: list[str] = []
     urls.extend(url for url in IMAGE_MARKDOWN_RE.findall(text) if is_supported_attachment_url(url))
+    urls.extend(url for url in IMAGE_HTML_SRC_RE.findall(text) if is_supported_attachment_url(url))
     for url in IMAGE_URL_RE.findall(text):
         if is_supported_attachment_url(url):
             urls.append(url)
     deduped: list[str] = []
     seen: set[str] = set()
     for url in urls:
-        clean = url.strip().rstrip(".,;")
+        clean = url.strip().rstrip(".,;\"'>")
         if clean not in seen:
             deduped.append(clean)
             seen.add(clean)
