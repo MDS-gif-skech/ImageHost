@@ -34,17 +34,9 @@ png, jpg, jpeg, webp, gif
 
 ## 权限控制
 
-默认只允许以下用户上传：
+当前配置为开放上传：任何 GitHub 登录用户都可以通过 issue 或 issue 评论上传图片。
 
-- 仓库 owner
-- collaborator
-- member
-
-如需放开给指定用户，请在仓库变量 `ALLOWED_UPLOADERS` 中填写 GitHub 用户名，多个用户用英文逗号分隔：
-
-```text
-alice,bob,charlie
-```
+注意：开放上传更方便，但也更容易被滥用。如果后续被刷图，可以再改回白名单或协作者模式。
 
 ## 管理命令
 

@@ -21,69 +21,26 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.issue.pull_request == null }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check uploader permission
+      - name: Allow uploader
         id: permission
         uses: actions/github-script@v7
         with:
           script: |
             const actor = context.payload.comment?.user?.login || context.payload.issue?.user?.login || context.actor;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const allowedRaw = process.env.ALLOWED_UPLOADERS || "";
-            const allowed = allowedRaw.split(",").map(s => s.trim()).filter(Boolean);
-
-            let permitted = actor === owner || allowed.includes(actor);
-            let permission = "none";
-            if (!permitted && context.eventName !== "workflow_dispatch") {
-              try {
-                const response = await github.rest.repos.getCollaboratorPermissionLevel({
-                  owner,
-                  repo,
-                  username: actor,
-                });
-                permission = response.data.permission;
-                permitted = ["admin", "maintain", "write"].includes(permission);
-              } catch (error) {
-                core.info(`No collaborator permission for ${actor}: ${error.message}`);
-              }
-            }
-
             core.setOutput("actor", actor);
-            core.setOutput("permitted", String(permitted));
-            core.setOutput("permission", permission);
-        env:
-          ALLOWED_UPLOADERS: ${{ vars.ALLOWED_UPLOADERS }}
-
-      - name: Stop if uploader is not allowed
-        if: ${{ steps.permission.outputs.permitted != 'true' }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const issue_number = context.payload.issue?.number;
-            if (issue_number) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number,
-                body: `@${{ steps.permission.outputs.actor }} 当前没有上传权限。请联系仓库管理员加入 collaborator，或加入仓库变量 ALLOWED_UPLOADERS。`,
-              });
-            }
-            core.setFailed("Uploader is not allowed.");
+            core.setOutput("permitted", "true");
 
       - name: Checkout
-        if: ${{ steps.permission.outputs.permitted == 'true' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Configure git
-        if: ${{ steps.permission.outputs.permitted == 'true' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Process upload
-        if: ${{ steps.permission.outputs.permitted == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
@@ -95,7 +52,6 @@ jobs:
           python scripts/process_issue_upload.py
 
       - name: Commit changes
-        if: ${{ steps.permission.outputs.permitted == 'true' }}
         id: commit
         run: |
           if git diff --quiet; then
@@ -109,7 +65,7 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Reply with URLs
-        if: ${{ steps.permission.outputs.permitted == 'true' && github.event.issue.number }}
+        if: ${{ github.event.issue.number }}
         uses: actions/github-script@v7
         with:
           script: |
