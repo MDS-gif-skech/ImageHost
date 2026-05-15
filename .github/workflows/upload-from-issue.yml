@@ -1,6 +1,6 @@
 name: Upload images from issues
 
-on:
+'on':
   issues:
     types: [opened, edited]
   issue_comment:
