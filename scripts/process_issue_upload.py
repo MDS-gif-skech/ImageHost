@@ -74,9 +74,9 @@ def read_event_body() -> str:
 
 def extract_candidate_urls(text: str) -> list[str]:
     urls: list[str] = []
-    urls.extend(IMAGE_MARKDOWN_RE.findall(text))
+    urls.extend(url for url in IMAGE_MARKDOWN_RE.findall(text) if is_supported_attachment_url(url))
     for url in IMAGE_URL_RE.findall(text):
-        if is_github_attachment_url(url):
+        if is_supported_attachment_url(url):
             urls.append(url)
     deduped: list[str] = []
     seen: set[str] = set()
@@ -88,14 +88,16 @@ def extract_candidate_urls(text: str) -> list[str]:
     return deduped
 
 
-def is_github_attachment_url(url: str) -> bool:
-    host = urlparse(url).netloc.lower()
+def is_supported_attachment_url(url: str) -> bool:
+    parsed = urlparse(url)
+    host = parsed.netloc.lower()
+    path = parsed.path.lower()
+    if host == "github.com" and path.startswith("/user-attachments/assets/"):
+        return True
     return host in {
-        "github.com",
         "user-images.githubusercontent.com",
         "private-user-images.githubusercontent.com",
         "repository-images.githubusercontent.com",
-        "objects.githubusercontent.com",
     }
 
 
