@@ -108,9 +108,9 @@
   <main>
     <section class="hero panel">
       <h1>ImageHost</h1>
-      <p>这是一个基于 GitHub 的长期图床。通过 Issues 上传图片，GitHub Actions 会自动保存图片、生成公开 URL，并记录到仓库索引。</p>
+      <p>这是一个基于 GitHub Pages 和 Cloudflare Worker 的长期图床。通过上传页提交图片，Worker 会自动写入 GitHub 仓库、生成公开 URL，并记录到仓库索引。</p>
       <div class="actions">
-        <a class="button" href="https://github.com/Ayayadaze/ImageHost/issues/new/choose">上传图片</a>
+        <a class="button" href="./upload.html">上传图片</a>
         <a class="button alt" href="./data/images.json">查看 JSON 索引</a>
         <a class="button alt" href="./data/images.csv">查看 CSV 索引</a>
       </div>

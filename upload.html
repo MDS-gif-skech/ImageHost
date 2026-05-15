@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upload | ImageHost</title>
+  <style>
+    :root {
+      --ink: #17202f;
+      --muted: #697386;
+      --line: #d9e1ec;
+      --paper: #fffaf0;
+      --accent: #0f766e;
+      --hot: #c65f35;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 15%, rgba(198, 95, 53, .18), transparent 24rem),
+        radial-gradient(circle at 90% 0%, rgba(15, 118, 110, .16), transparent 26rem),
+        linear-gradient(135deg, #fffaf0, #edf6f4);
+    }
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(40px, 8vw, 78px);
+      line-height: .92;
+      letter-spacing: -0.06em;
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 22px 68px rgba(23, 32, 47, .11);
+      padding: 28px;
+      backdrop-filter: blur(14px);
+    }
+    .drop {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      margin: 24px 0;
+      border: 2px dashed #9fb3c8;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .56);
+      text-align: center;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    .drop.drag {
+      border-color: var(--accent);
+      background: rgba(15, 118, 110, .08);
+      transform: translateY(-2px);
+    }
+    input[type="file"] {
+      display: none;
+    }
+    label,
+    input[type="text"],
+    input[type="password"] {
+      display: block;
+      width: 100%;
+    }
+    label {
+      margin: 14px 0 8px;
+      font-weight: 700;
+    }
+    input[type="text"],
+    input[type="password"] {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      font: inherit;
+      background: #fff;
+    }
+    button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 22px;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .52;
+      cursor: not-allowed;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .result {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 16px;
+    }
+    code,
+    textarea {
+      font-family: "Cascadia Mono", Consolas, monospace;
+    }
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #f9fbfd;
+    }
+    .error {
+      color: #a33a2d;
+      font-weight: 700;
+    }
+    .hint {
+      font-size: 14px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <h1>Upload Image</h1>
+      <p>选择或拖入图片，上传到 GitHub 仓库并生成长期可访问 URL。支持 png、jpg、jpeg、webp、gif。</p>
+
+      <label for="worker">Worker 上传接口</label>
+      <input id="worker" type="text" placeholder="https://imagehost-uploader.your-name.workers.dev/upload">
+      <p class="hint">部署 Worker 后，把地址填到这里。浏览器会记住这个地址。</p>
+
+      <label for="secret">上传密码，可留空</label>
+      <input id="secret" type="password" placeholder="如果 Worker 设置了 UPLOAD_SECRET，就填这里">
+
+      <div id="drop" class="drop">
+        <div>
+          <strong>拖入图片到这里</strong>
+          <p>或点击选择文件，可多选。</p>
+        </div>
+      </div>
+      <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+
+      <div class="row">
+        <button id="upload" disabled>上传并生成 URL</button>
+        <span id="status" class="hint">尚未选择图片</span>
+      </div>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.querySelector("#file");
+    const drop = document.querySelector("#drop");
+    const uploadButton = document.querySelector("#upload");
+    const status = document.querySelector("#status");
+    const result = document.querySelector("#result");
+    const workerInput = document.querySelector("#worker");
+    const secretInput = document.querySelector("#secret");
+
+    workerInput.value = localStorage.getItem("imagehost_worker_url") || "";
+    secretInput.value = localStorage.getItem("imagehost_upload_secret") || "";
+
+    let selectedFiles = [];
+
+    drop.addEventListener("click", () => fileInput.click());
+    drop.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      drop.classList.add("drag");
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+    drop.addEventListener("drop", (event) => {
+      event.preventDefault();
+      drop.classList.remove("drag");
+      setFiles([...event.dataTransfer.files]);
+    });
+    fileInput.addEventListener("change", () => setFiles([...fileInput.files]));
+
+    uploadButton.addEventListener("click", upload);
+
+    function setFiles(files) {
+      selectedFiles = files.filter((file) => file.type.startsWith("image/"));
+      uploadButton.disabled = selectedFiles.length === 0;
+      status.textContent = selectedFiles.length
+        ? `已选择 ${selectedFiles.length} 张图片`
+        : "尚未选择图片";
+    }
+
+    async function upload() {
+      const endpoint = workerInput.value.trim();
+      if (!endpoint) {
+        status.innerHTML = "<span class='error'>请先填写 Worker 上传接口。</span>";
+        return;
+      }
+      localStorage.setItem("imagehost_worker_url", endpoint);
+      localStorage.setItem("imagehost_upload_secret", secretInput.value);
+
+      const form = new FormData();
+      for (const file of selectedFiles) {
+        form.append("file", file, file.name);
+      }
+      form.append("uploader", "web");
+
+      uploadButton.disabled = true;
+      status.textContent = "上传中...";
+      result.innerHTML = "";
+      try {
+        const headers = {};
+        if (secretInput.value) {
+          headers["X-Upload-Secret"] = secretInput.value;
+        }
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: form,
+          headers,
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || `HTTP ${response.status}`);
+        }
+        renderResult(payload.files || []);
+        status.textContent = "上传完成";
+      } catch (error) {
+        status.innerHTML = `<span class="error">${escapeHtml(error.message)}</span>`;
+      } finally {
+        uploadButton.disabled = selectedFiles.length === 0;
+      }
+    }
+
+    function renderResult(files) {
+      if (!files.length) {
+        result.innerHTML = "<p>没有返回文件。</p>";
+        return;
+      }
+      result.innerHTML = files.map((file) => {
+        const markdown = `![image](${file.url})`;
+        return `
+          <article class="item">
+            <strong>${escapeHtml(file.original_name || file.id)}</strong>
+            ${file.duplicate ? "<p class='hint'>重复图片，已返回已有 URL。</p>" : ""}
+            <label>URL</label>
+            <textarea readonly>${escapeHtml(file.url)}</textarea>
+            <label>Markdown</label>
+            <textarea readonly>${escapeHtml(markdown)}</textarea>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[char]);
+    }
+  </script>
+</body>
+</html>

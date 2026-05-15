@@ -1,26 +1,28 @@
 # ImageHost
 
-长期图床仓库，基于 GitHub Issues、GitHub Actions 和 GitHub Pages。
+长期图床仓库，基于 GitHub Pages + Cloudflare Worker。
 
-## 使用方式
+当前不再依赖 GitHub Actions。图片上传由 Cloudflare Worker 接收，Worker 使用 GitHub API 把图片和索引写入本仓库，因此即使账号无法运行 GitHub Actions，也可以正常使用。
 
-1. 打开本仓库的 Issues。
-2. 新建一个 `Upload image` issue，或者在已有 issue 评论中粘贴图片。
-3. 等待 GitHub Actions 自动处理。
-4. Action 会把图片保存到 `images/YYYY/MM/`，并在 issue 里回复最终图片 URL。
-5. 图片记录会自动写入：
-   - `data/images.json`
-   - `data/images.csv`
+## 访问入口
 
-## 图片 URL
-
-GitHub Pages URL 格式：
+图床首页：
 
 ```text
-https://Ayayadaze.github.io/ImageHost/images/YYYY/MM/filename.ext
+https://ayayadaze.github.io/ImageHost/
 ```
 
-如果后续绑定自定义域名，例如 `https://img.example.com`，只需要修改仓库变量 `PUBLIC_BASE_URL`。
+上传页面：
+
+```text
+https://ayayadaze.github.io/ImageHost/upload.html
+```
+
+图片 URL 格式：
+
+```text
+https://ayayadaze.github.io/ImageHost/images/YYYY/MM/filename.ext
+```
 
 ## 支持格式
 
@@ -30,26 +32,44 @@ https://Ayayadaze.github.io/ImageHost/images/YYYY/MM/filename.ext
 png, jpg, jpeg, webp, gif
 ```
 
-出于安全考虑，默认不接收 `svg`。如确实需要，可在 workflow 中加入白名单，但不建议让外部用户上传 SVG。
+不建议开放 SVG，因为 SVG 可能包含脚本或外部资源。
 
-## 权限控制
-
-当前配置为开放上传：任何 GitHub 登录用户都可以通过 issue 或 issue 评论上传图片。
-
-注意：开放上传更方便，但也更容易被滥用。如果后续被刷图，可以再改回白名单或协作者模式。
-
-## 管理命令
-
-如果想在 issue 评论里手动触发，可以评论：
+## 工作流程
 
 ```text
-/upload
+用户打开 upload.html
+-> 选择图片
+-> 浏览器把图片 POST 到 Cloudflare Worker
+-> Worker 调用 GitHub API
+-> 图片写入 images/YYYY/MM/
+-> 索引写入 data/images.json 和 data/images.csv
+-> Worker 返回可访问 URL
 ```
 
-只要评论里包含图片附件，workflow 就会处理。
+## 仓库结构
 
-## 重要限制
+```text
+ImageHost/
+  images/                 # 图片文件
+  data/
+    images.json           # 图片索引 JSON
+    images.csv            # 图片索引 CSV
+  worker/                 # Cloudflare Worker 上传服务
+  docs/                   # 使用和部署说明
+  upload.html             # 静态上传页面
+  index.html              # 首页
+```
 
-- GitHub Pages 适合个人和项目图床，不适合超大流量商业 CDN。
-- 建议单张图片控制在 10MB 内。
-- 请不要上传敏感图片，因为 Pages 发布后是公开访问的。
+## 部署说明
+
+请看：
+
+```text
+docs/CloudflareWorker部署.md
+```
+
+## 安全建议
+
+Worker 支持可选上传密码 `UPLOAD_SECRET`。如果只给自己或少数人使用，建议设置；如果希望完全开放，可以不设置。
+
+公开图床不要上传隐私图片、证件、合同、账号截图等敏感内容。
