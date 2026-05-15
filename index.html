@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ImageHost</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18212f;
+      --muted: #667085;
+      --line: #d7deea;
+      --paper: #fffaf1;
+      --accent: #d96c3b;
+      --accent-2: #215a6d;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(217, 108, 59, .18), transparent 26rem),
+        radial-gradient(circle at 80% 0%, rgba(33, 90, 109, .16), transparent 24rem),
+        linear-gradient(135deg, #fffaf1 0%, #eef5f6 100%);
+    }
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 64px 0;
+    }
+    .hero {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 88px);
+      line-height: .9;
+      letter-spacing: -0.06em;
+    }
+    p {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, .74);
+      box-shadow: 0 24px 70px rgba(24, 33, 47, .1);
+      padding: 28px;
+      backdrop-filter: blur(14px);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    a.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #fff;
+      background: var(--accent-2);
+      font-weight: 700;
+    }
+    a.button.alt {
+      color: var(--ink);
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .card {
+      padding: 20px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    code {
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(33, 90, 109, .09);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero panel">
+      <h1>ImageHost</h1>
+      <p>这是一个基于 GitHub 的长期图床。通过 Issues 上传图片，GitHub Actions 会自动保存图片、生成公开 URL，并记录到仓库索引。</p>
+      <div class="actions">
+        <a class="button" href="https://github.com/Ayayadaze/ImageHost/issues/new/choose">上传图片</a>
+        <a class="button alt" href="./data/images.json">查看 JSON 索引</a>
+        <a class="button alt" href="./data/images.csv">查看 CSV 索引</a>
+      </div>
+    </section>
+    <section class="grid">
+      <div class="card">
+        <strong>URL 格式</strong>
+        <code>https://Ayayadaze.github.io/ImageHost/images/YYYY/MM/name.png</code>
+      </div>
+      <div class="card">
+        <strong>支持格式</strong>
+        <span>png, jpg, jpeg, webp, gif</span>
+      </div>
+      <div class="card">
+        <strong>自动记录</strong>
+        <span>上传人、时间、文件名、SHA256、公开 URL 都会写入索引。</span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

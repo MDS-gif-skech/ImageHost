@@ -1,0 +1,22 @@
+name: Upload image
+description: Paste or drag images here. The bot will save them into the image host.
+title: "[Upload]: "
+labels:
+  - upload
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Paste or drag images into the text box below.
+
+        Supported formats: png, jpg, jpeg, webp, gif.
+
+        After submitting, GitHub Actions will save the images and reply with final URLs.
+  - type: textarea
+    id: images
+    attributes:
+      label: Images
+      description: Paste or drag image files here.
+      placeholder: Paste images here.
+    validations:
+      required: true
