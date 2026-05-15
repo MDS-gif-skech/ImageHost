@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "b8442cff731ca8ca",
+    "created_at": "2026-05-15T10:47:33Z",
+    "uploader": "MDS-gif-skech",
+    "source_issue": "https://github.com/MDS-gif-skech/ImageHost/issues/2",
+    "original_name": "upload.jpg",
+    "stored_path": "images/2026/05/20260515T104733Z_issue2_b8442cff731ca8ca.jpg",
+    "url": "https://mds-gif-skech.github.io/ImageHost/images/2026/05/20260515T104733Z_issue2_b8442cff731ca8ca.jpg",
+    "sha256": "b8442cff731ca8ca833b00a6b4ad8dbb3db917403716bb53c3096d7b8c38623d",
+    "size_bytes": 61221,
+    "content_type": "image/jpeg"
+  }
+]
