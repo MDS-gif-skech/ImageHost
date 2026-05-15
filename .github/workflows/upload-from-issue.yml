@@ -58,7 +58,10 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git add images data
+          git add data
+          if [ -d images ]; then
+            git add images
+          fi
           git commit -m "Upload images from issue #${{ github.event.issue.number }}"
           git pull --rebase
           git push
